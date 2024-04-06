@@ -1,1 +1,1 @@
-# somechanges
+# homework of the 2nd lesson
