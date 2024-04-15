@@ -1,1 +1,1 @@
-# homework of the 2nd lesson
+# homework of the 3nd lesson
