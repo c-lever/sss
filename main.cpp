@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 class IStatistics {
 public:
@@ -16,7 +17,7 @@ public:
 
 class Min : public IStatistics {
 public:
-	Min() : m_min{std::numeric_limits<double>::min()} {}
+	Min() : m_min{std::numeric_limits<double>::max()} {}
 
 	void update(double next) override {
 		if (next < m_min) {
@@ -39,7 +40,7 @@ private:
 
 class Max : public IStatistics {
 public:
-	Max() : m_max{std::numeric_limits<double>::min()} {}
+	Max() : m_max{std::numeric_limits<double>::lowest()} {}
 
 	void update(double next) override {
 		if (next > m_max) {
@@ -87,44 +88,50 @@ public:
 
 	void update(double next) override {
 		list.push_back(next);
-		avg_sum += next;
+		sum += next;
 	}
 
 	double eval() const override {
-		avg = avg_sum / list.size();
-		for (double num : list) {
-			list_pows.push_back(pow(num - avg, 2));
+		if (result == 0) {
+			avg = sum / list.size();
+			for (int i = 0; i < list.size(); i++) {
+				list[i] = pow(list[i] - avg, 2);
+				pows_sum += list[i];
+			}
+			result = sqrt(pows_sum / list.size());
 		}
 
-		for (double num : list_pows) {
-			avg_pows_sum += num;
-		}
-
-		return sqrt(avg_pows_sum / list_pows.size());
+		return result;
 	}
+
+
 
 	const char* name() const override {
 		return "std";
 	}
 
 private:
-	mutable double avg_pows_sum;
-	double avg_sum;
-	double mutable avg;
-	std::vector<double> list;
-	mutable std::vector<double> list_pows;
-
+	mutable double pows_sum;
+	double sum;
+	mutable double avg;
+	mutable std::vector<double> list;
+	mutable double result;
 };
 
 class Pct90 : public IStatistics {
 public:
 
 	void update(double next) override {
-		N += 1;
+		list.push_back(next);
 	}
 
 	double eval() const override {
-		pct90 = 0.9 * (N - 1);
+		std::sort(list.begin(), list.end());
+		if (list.size() % 2 != 0) {
+			pct90 = list[static_cast<int>(list.size() * 90 / 100)];
+		} else {
+			pct90 = ( list[static_cast<int>(list.size() * 90 / 100)-1] + list[static_cast<int>(list.size() * 90 / 100)] ) / 2;
+		}
 		return pct90;
 	}
 
@@ -134,7 +141,8 @@ public:
 
 private:
 	mutable double pct90;
-	double N;
+	mutable int index;
+	mutable std::vector<double> list;
 
 
 };
@@ -143,13 +151,19 @@ class Pct95 : public IStatistics {
 public:
 
 	void update(double next) override {
-		N += 1;
+		list.push_back(next);
 	}
 
 	double eval() const override {
-		pct95 = 0.95 * (N - 1);
+		std::sort(list.begin(), list.end());
+		if (list.size() % 2 != 0) {
+			pct95 = list[static_cast<int>(list.size() * 95 / 100)];
+		} else {
+			pct95 = (list[static_cast<int>(list.size() * 95 / 100)-1]+list[static_cast<int>(list.size() * 95 / 100)])/2;
+		}
 		return pct95;
 	}
+
 
 	const char* name() const override {
 		return "pct95";
@@ -157,7 +171,8 @@ public:
 
 private:
 	mutable double pct95;
-	double N;
+	mutable int index;
+	mutable std::vector<double> list;
 
 };
 
