@@ -141,7 +141,6 @@ public:
 
 private:
 	mutable double pct90;
-	mutable int index;
 	mutable std::vector<double> list;
 
 
@@ -171,7 +170,6 @@ public:
 
 private:
 	mutable double pct95;
-	mutable int index;
 	mutable std::vector<double> list;
 
 };
