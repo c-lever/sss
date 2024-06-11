@@ -1,215 +1,298 @@
 #include <iostream>
-#include <limits>
-#include <cmath>
-#include <string>
-#include <vector>
-#include <algorithm>
 
-class IStatistics {
+
+template <typename T>
+class Array {
 public:
-	virtual ~IStatistics() {}
+    explicit Array() : data_{nullptr}, size_{0} {}
 
-	virtual void update(double next) = 0;
-	virtual double eval() const = 0;
-	virtual const char * name() const = 0;
-};
+    void push_back(T value) {
+        T *new_data = new T[size_ + 1];
+        for (size_t i = 0; i < size_; ++i) {
+            new_data[i] = data_[i];
+        }
+        new_data[size_] = value;
+        delete [] data_;
+        data_ = new_data;
+        size_ += 1;
+    }
 
+    void push_front(T value) {
+        // Same .push_back() func, but reversed
+        T *new_data = new T[size_ + 1];
+        for (size_t i = size_; i > 0; --i) {
+            new_data[i] = data_[i-1];
+        }
+        new_data[0] = value;
+        delete [] data_;
+        data_ = new_data;
+        size_ += 1;
+    }
 
-class Min : public IStatistics {
-public:
-	Min() : m_min{std::numeric_limits<double>::max()} {}
+    void insert(T value, size_t index) {
+        T *new_data = new T[size_ + 1];
+        for (size_t i = 0; i < index; ++i) {
+            new_data[i] = data_[i];
+        }
+        new_data[index] = value;
+        for (size_t j = index; j < size_; ++j) {
+            new_data[j+1] = data_[j];
+        }
+        delete [] data_;
+        data_ = new_data;
+        size_ += 1;
+    }
 
-	void update(double next) override {
-		if (next < m_min) {
-			m_min = next;
-		}
-	}
+    void erase(size_t index) {
+        T *new_data = new T[size_ - 1];
+        for (size_t i = 0; i < size_; ++i) {
+            if (i < index) {
+                new_data[i] = data_[i];
+            } else {
+                new_data[i] = data_[i+1];
+            }
+        }
+        delete [] data_;
+        data_ = new_data;
+        size_ -= 1;
+    }
 
-	double eval() const override {
-		return m_min;
-	}
+    void print() const {
+        for (size_t i = 0; i < size_; ++i) {
+            std::cout << data_[i] << " ";
+        }
+        std::cout << std::endl;
+    }
 
-	const char * name() const override {
-		return "min";
-	}
+    size_t size() const { return size_; }
+
+    T &operator[](const size_t index) const {
+        if (index >= size_) {
+            std::cout << "index out of range" << std::endl;
+        } else {
+            return data_[index];
+        }
+    }
 
 private:
-	double m_min;
+    T *data_;
+    size_t size_;
 };
 
 
-class Max : public IStatistics {
-public:
-	Max() : m_max{std::numeric_limits<double>::lowest()} {}
 
-	void update(double next) override {
-		if (next > m_max) {
-			m_max = next;
-		}
-	}
+template <typename T>
+struct Node {
+    Node<T>* next; 
+    T data;
 
-	double eval() const override {
-		return m_max;
-	}
-
-	const char* name() const override {
-		return "max";
-	}
-
-private:
-	double m_max;
+    Node(const T &value) : data{value}, next{nullptr} {}
 };
 
-class Mean : public IStatistics {
+template <typename T>
+class LinkedList {
 public:
 
-	void update(double next) override {
-		sum += next;
-		n += 1;
-	}
+    explicit LinkedList() : head{nullptr}, size_{0} {}
 
-	double eval() const override {
-		return sum / n;
-	}
+    ~LinkedList() {
+        Node<T>* current = head;
+        while (current != nullptr) {
+            Node<T>* next = current->next;
+            delete current;
+            current = next;
+        }
+        head = nullptr;
+    }
 
-	const char* name() const override {
-		return "mean";
-	}
+    void push_back(const T &value) {
+        Node<T> *newNode = new Node<T>(value);
+        if (head == nullptr) {
+            head = newNode;
+            size_ += 1;
+            return;
+        }
+        Node<T> *current = head;
+        while (current->next != nullptr) {
+            current = current->next;
+        }
+        current->next = newNode;
+        size_ += 1;
+    }
+
+    void push_front(const T &value) {
+        Node<T> *newNode = new Node<T>(value);
+        newNode->next = head;
+        head = newNode;
+        size_ += 1;
+    }
+
+    void erase(const size_t &index) {
+        if (index < 0) {
+            std::cout << "Invalid index" << std::endl;
+            return;
+        }
+
+        if (index == 0) {
+            if (head != nullptr) {
+                Node<T> *tmp = head;
+                head = head->next;
+                delete tmp;
+                size_ -= 1;
+            }
+            return;
+        }
+
+        Node<T>* current = head;
+        int currentIndex = 0;
+
+        while (current != nullptr && currentIndex < index - 1) {
+            current = current->next;
+            currentIndex++;
+        }
+
+        if (current != nullptr && current->next != nullptr) {
+            Node<T>* temp = current->next;
+            current->next = current->next->next;
+            delete temp;
+        } else {
+            std::cout << "Index out of range." << std::endl;
+        }
+        size_ -= 1;
+    }
+
+    void insert(const T &value, const size_t &index) {
+        if (index < 0) {
+            std::cout << "Invalid index" << std::endl;
+            return;
+        }
+
+        if (index == 0) {
+            push_front(value);
+            return;
+        }
+
+        Node<T>* newNode = new Node<T>(value);
+        Node<T>* current = head;
+        int count = 0;
+        while (count < index - 1 && current != nullptr) {
+            current = current->next;
+            count++;
+        }
+        if (current == nullptr) {
+            std::cout << "Index out of bounds.\n";
+            return;
+        }
+        newNode->next = current->next;
+        current->next = newNode;
+        
+        size_ += 1;
+    }
+
+    void print() {
+        Node<T> *current = head;
+        while (current != nullptr) {
+            std::cout << current->data << " ";
+            current = current->next;
+        }
+        std::cout << std::endl;
+    }
+
+    size_t size() const { return size_; }
+
+    T &operator[](const size_t index) const {
+        if (index >= size_) {
+            std::cout << "index out of range" << std::endl;
+        } else {
+            Node<T> *current = head;
+            for (size_t i = 0; i < index; ++i) {
+                current = current->next;
+            }
+            return current->data;
+        }
+    }
+
+    
 
 private:
-	double sum;
-	double n;
-
-
+    Node<T> *head;
+    size_t size_;
 };
 
-class Std : public IStatistics {
-public:
-
-	void update(double next) override {
-		list.push_back(next);
-		sum += next;
-	}
-
-	double eval() const override {
-		if (result == 0) {
-			avg = sum / list.size();
-			for (int i = 0; i < list.size(); i++) {
-				list[i] = pow(list[i] - avg, 2);
-				pows_sum += list[i];
-			}
-			result = sqrt(pows_sum / list.size());
-		}
-
-		return result;
-	}
 
 
 
-	const char* name() const override {
-		return "std";
-	}
-
-private:
-	mutable double pows_sum;
-	double sum;
-	mutable double avg;
-	mutable std::vector<double> list;
-	mutable double result;
-};
-
-class Pct90 : public IStatistics {
-public:
-
-	void update(double next) override {
-		list.push_back(next);
-	}
-
-	double eval() const override {
-		std::sort(list.begin(), list.end());
-		if (list.size() % 2 != 0) {
-			pct90 = list[static_cast<int>(list.size() * 90 / 100)];
-		} else {
-			pct90 = ( list[static_cast<int>(list.size() * 90 / 100)-1] + list[static_cast<int>(list.size() * 90 / 100)] ) / 2;
-		}
-		return pct90;
-	}
-
-	const char* name() const override {
-		return "pct90";
-	}
-
-private:
-	mutable double pct90;
-	mutable std::vector<double> list;
 
 
-};
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const Array<T> &container) {
+    return os;
+}
 
-class Pct95 : public IStatistics {
-public:
-
-	void update(double next) override {
-		list.push_back(next);
-	}
-
-	double eval() const override {
-		std::sort(list.begin(), list.end());
-		if (list.size() % 2 != 0) {
-			pct95 = list[static_cast<int>(list.size() * 95 / 100)];
-		} else {
-			pct95 = (list[static_cast<int>(list.size() * 95 / 100)-1]+list[static_cast<int>(list.size() * 95 / 100)])/2;
-		}
-		return pct95;
-	}
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const LinkedList<T> &container) {
+    return os;
+}
 
 
-	const char* name() const override {
-		return "pct95";
-	}
-
-private:
-	mutable double pct95;
-	mutable std::vector<double> list;
-
-};
 
 
 int main() {
-	const size_t statistics_count = 6;
-	IStatistics *statistics[statistics_count];
+    // ARRAY
+    std::cout << "ARRAY: " << std::endl;
 
-	statistics[0] = new Min{};
-	statistics[1] = new Max{};
-	statistics[2] = new Mean{};
-	statistics[3] = new Std{};
-	statistics[4] = new Pct90{};
-	statistics[5] = new Pct95{};
+    Array<int> Array_Container;
+    
+    for (int i = 0; i < 10; ++i) {
+        Array_Container.push_back(i);
+    }
+    
+    Array_Container.print();
+    std::cout << Array_Container.size() << std::endl;
+    /*
+    So if I wanna delete the 3rd, 5th, and 7th elements of the list, I have to delete the 2,4,6-i elements.
+    However, I cant do it all at once because the .erase() function can only delete one element at a time. 
+    Therefore I will need to call this function 3 times, but each time I call it, the list will be reindexed.
+    The 1st index I need to delete is still 2, but the subsequent indexes will be shifted by 1.
+    As a result, I have to delete one by one 2,3,4-i elements of the list.
+    */
+    Array_Container.erase(2);
+    Array_Container.erase(3);
+    Array_Container.erase(4);
+    Array_Container.print();
+    Array_Container.push_front(10);
+    Array_Container.print();
+    Array_Container.insert(20, static_cast<size_t>(Array_Container.size() / 2));
+    Array_Container.print();
+    Array_Container.push_back(30);
+    Array_Container.print();
 
-	double val = 0;
+    std::cout << std::endl; 
 
+    //-----------------------------------------------------------------------------------------------------
+    // LINKED LIST
 
-	while (std::cin >> val) {
-		for (size_t i = 0; i < statistics_count; ++i) {
-			statistics[i]->update(val);
-		}
-	}
+    std::cout << "LINKED LIST: " << std::endl;
 
-	// Handle invalid input data
-	if (!std::cin.eof() && !std::cin.good()) {
-		std::cerr << "Invalid input data\n";
-		return 1;
-	}
+    LinkedList<int> LinkedList_Container;
 
-	// Print results if any
-	for (size_t i = 0; i < statistics_count; ++i) {
-		std::cout << statistics[i]->name() << " = " << statistics[i]->eval() << std::endl;
-	}
+    for (int i = 0; i < 10; ++i) {
+        LinkedList_Container.push_back(i);
+        
+    }
 
-	// Clear memory - delete all objects created by new
-	for (size_t i = 0; i < statistics_count; ++i) {
-		delete statistics[i];
-	}
-
-	return 0;
+    LinkedList_Container.print();
+    std::cout << LinkedList_Container.size() << std::endl;
+    LinkedList_Container.erase(2);
+    LinkedList_Container.erase(3);
+    LinkedList_Container.erase(4);
+    LinkedList_Container.print();
+    LinkedList_Container.push_front(10);
+    LinkedList_Container.print();
+    LinkedList_Container.insert(20, static_cast<size_t>(LinkedList_Container.size() / 2));
+    LinkedList_Container.print();
+    LinkedList_Container.push_back(30);
+    LinkedList_Container.print();
+    
+    return 0;
 }

@@ -1,1 +1,1 @@
-# homework of the 5th lesson
+# homework of the 6th lesson
