@@ -1,1 +1,1 @@
-# homework of the 1st lesson
+# PROJECT BLACKJACK
