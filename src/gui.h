@@ -4,19 +4,18 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include <windows.h>
 #include <filesystem>
 #include <string>
 
 // FOR GUI
-extern std::filesystem::path path;
-extern float X_FOR_CARDS;
+const extern std::filesystem::path path;
+const extern float X_FOR_CARDS;
 extern bool GAME_IS_RUNNING;
 
 
 struct logger {
-    static void info_gui(std::string &text);
-    static void info_func(std::string &text);
+    static void info_gui(const std::string &text);
+    static void info_func(const std::string &text);
 };
 
 struct Card {

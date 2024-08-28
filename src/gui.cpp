@@ -2,26 +2,25 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include <windows.h>
 #include <filesystem>
 #include "gui.h"
 #include "func.h"
 
 
-void logger::info_gui(std::string &text) {
+void logger::info_gui(const std::string &text) {
     std::string output = "[INFO_GUI] " + text;
     std::cout << output << std::endl;
 }
 
-void logger::info_func(std::string &text) {
+void logger::info_func(const std::string &text) {
     std::string output = "--- [INFO_FUNC] " + text;
     std::cout << output << std::endl;
 }
 
 
 // FOR GUI
-std::filesystem::path path = std::filesystem::current_path().parent_path().parent_path().parent_path();
-float X_FOR_CARDS = 278.0f;
+const std::filesystem::path path = std::filesystem::current_path().parent_path().parent_path().parent_path();
+const float X_FOR_CARDS = 278.0f;
 bool GAME_IS_RUNNING = false;
 std::vector<Card> pc_cards;
 std::vector<Card> player_cards;
@@ -71,11 +70,7 @@ void INIT_player(bool reset = false) {
     }
 }
 
-std::string getMainCppFullPath() {
-    char exePath[MAX_PATH];
-    GetModuleFileNameA(NULL, exePath, MAX_PATH);
-    return std::string(exePath); 
-}
+
 
 void GUI_RESET(sf::Text &TEXT_score_pc, sf::Text &TEXT_score_player, sf::Text &TEXT_you_have, sf::Text &TEXT_bet_amount, sf::Text &TEXT_won_lose_draw, int &you_have) {
     TEXT_won_lose_draw.setString(std::string("        "));
@@ -97,6 +92,8 @@ void GUI_RESET(sf::Text &TEXT_score_pc, sf::Text &TEXT_score_player, sf::Text &T
 
 void show_ui() {
     BLACKJACK GAME;
+    std::cout << "SEED = " << GAME.get_SEED() << std::endl;
+    //logger::info_func(std::string("SEED = " + GAME.get_SEED()));
 
     sf::RenderWindow window({1600u, 1000u}, "Blackjack game", sf::Style::Close);
     window.setFramerateLimit(144);
@@ -231,15 +228,14 @@ void show_ui() {
 
 
     // SCORE_PC
-    float squareSize = 100.0f;
-    sf::RectangleShape SQUARE_score_pc(sf::Vector2f(squareSize, squareSize));
+    sf::RectangleShape SQUARE_score_pc(sf::Vector2f(100.0f, 100.0f));
     SQUARE_score_pc.setFillColor(sf::Color::White);
     SQUARE_score_pc.setPosition(10, 10);
     sf::Text TEXT_score_pc("  ", font, 48);
     TEXT_score_pc.setFillColor(sf::Color::Black);
     TEXT_score_pc.setPosition(35, 30);
 
-    sf::RectangleShape SQUARE_score_player(sf::Vector2f(squareSize, squareSize));
+    sf::RectangleShape SQUARE_score_player(sf::Vector2f(100.0f, 100.0f));
     SQUARE_score_player.setFillColor(sf::Color::White);
     SQUARE_score_player.setPosition(10, 890);
     sf::Text TEXT_score_player("  ", font, 48);

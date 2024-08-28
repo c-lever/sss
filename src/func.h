@@ -8,6 +8,10 @@
 #include <ctime>
 
 class BLACKJACK {
+private:
+    std::mt19937 generator;
+    std::random_device::result_type SEED;
+
 public:
     BLACKJACK();
 
@@ -84,10 +88,12 @@ public:
     int BET_AMOUNT = 0;
     int YOU_HAVE = 1000;
 
+    std::random_device::result_type get_SEED();
     int get_random_index(int size);
     void GAME_RESET(bool new_game);
-    int CHECK_PC_POINTS();
-    int CHECK_PLAYER_POINTS();
+    //int CHECK_PC_POINTS();
+    //int CHECK_PLAYER_POINTS();
+    int CHECK_POINTS(std::vector<std::string>& CARDS);
     int CHECK_FOR_WIN();
     void START_GAME(int &bet);
     int HIT();
