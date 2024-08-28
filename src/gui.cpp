@@ -93,7 +93,6 @@ void GUI_RESET(sf::Text &TEXT_score_pc, sf::Text &TEXT_score_player, sf::Text &T
 void show_ui() {
     BLACKJACK GAME;
     std::cout << "SEED = " << GAME.get_SEED() << std::endl;
-    //logger::info_func(std::string("SEED = " + GAME.get_SEED()));
 
     sf::RenderWindow window({1600u, 1000u}, "Blackjack game", sf::Style::Close);
     window.setFramerateLimit(144);
