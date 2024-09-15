@@ -21,55 +21,22 @@ void logger::info_func(const std::string &text) {
 // FOR GUI
 const std::filesystem::path path = std::filesystem::current_path().parent_path().parent_path().parent_path();
 const float X_FOR_CARDS = 278.0f;
+const short CARDS_AMOUNT = 10;
 bool GAME_IS_RUNNING = false;
 std::vector<Card> pc_cards;
 std::vector<Card> player_cards;
 
 
-
-void INIT_pc(bool reset = false) {
+void INIT_CARDS(std::vector<Card>& cards, bool reset = false) {
     if (reset) {
-        if (pc_cards.size() > 0) {
-            for (size_t i = 0; i < 10; ++i) {
-                pc_cards[i].is_visible = false;
-                pc_cards[i].card_count = 0;
-                pc_cards[i].card_name = "";
-            }
+        for (Card& card : cards) {
+            card.is_visible = false;
+            card.card_name = "";
         }
-
     } else {
-        if (pc_cards.size() != 10) {
-            for (size_t i = 0; i < 10; ++i) {
-                Card pc_card;
-                pc_cards.emplace_back(); 
-                pc_cards[i].card_count = i + 1;
-            }
-        } 
-    }
-
-}
-
-void INIT_player(bool reset = false) {
-    if (reset) {
-        if (player_cards.size() > 0) {
-            for (size_t i = 0; i < 10; ++i) {
-                player_cards[i].is_visible = false;
-                player_cards[i].card_count = 0;
-                player_cards[i].card_name = "";
-            }
-        }
-
-    } else {
-        if (player_cards.size() != 10) {
-            for (size_t i = 0; i < 10; ++i) {
-                Card player_card;
-                player_cards.emplace_back(); 
-                player_cards[i].card_count = i + 1;
-            }
-        }
+        cards.resize(CARDS_AMOUNT);
     }
 }
-
 
 
 void GUI_RESET(sf::Text &TEXT_score_pc, sf::Text &TEXT_score_player, sf::Text &TEXT_you_have, sf::Text &TEXT_bet_amount, sf::Text &TEXT_won_lose_draw, int &you_have) {
@@ -84,9 +51,9 @@ void GUI_RESET(sf::Text &TEXT_score_pc, sf::Text &TEXT_score_player, sf::Text &T
     logger::info_gui(std::string("[RESETED] -- text_bet_amount --> 'Bet amount: '"));
     TEXT_you_have.setString(std::string("You have: " + std::to_string(you_have)));
     logger::info_gui(std::string("[RESETED] -- text_bet_amount --> 'You have: '"));
-    INIT_pc(true);
+    INIT_CARDS(pc_cards, true);
     logger::info_gui(std::string("[RESETED] -- INIT_pc"));
-    INIT_player(true);
+    INIT_CARDS(player_cards, true);
     logger::info_gui(std::string("[RESETED] -- INIT_player"));
 }
 
@@ -318,9 +285,9 @@ void show_ui() {
                         GAME.START_GAME(GAME.BET_AMOUNT);
                         logger::info_func(std::string("GAME.START_GAME("+std::to_string(GAME.BET_AMOUNT)+")"));
 
-                        INIT_pc(false);
+                        INIT_CARDS(pc_cards, false);
                         logger::info_gui(std::string("INIT_pc(false)"));
-                        INIT_player(false);
+                        INIT_CARDS(player_cards, false);
                         logger::info_gui(std::string("INIT_player(false)"));
 
                         // PLAYER'S CARD 1
